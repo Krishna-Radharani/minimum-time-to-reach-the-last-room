@@ -1,0 +1,57 @@
+class Solution {
+public:
+    int minTimeToReach(vector<vector<int>>& moveTime) {
+        int row = moveTime.size();
+        int col = moveTime[0].size();
+
+        // Min-heap priority queue to track {time, {x-cor, y-cor}}
+        priority_queue<pair<int, pair<int, int>>, vector<pair<int, pair<int, int>>>, greater<>> mini;
+        mini.push({0, {0, 0}}); // Starting point with time = 0
+
+        // Time array to track minimum time to reach each cell
+        vector<vector<int>> timearray(row, vector<int>(col, 1e9));
+        timearray[0][0] = 0;
+
+        int delrow[] = {0, 1, -1, 0};
+        int delcol[] = {1, 0, 0, -1};
+
+        while (!mini.empty()) {
+            auto top = mini.top();
+            int time = top.first;
+            int x_cor = top.second.first;
+            int y_cor = top.second.second;
+            mini.pop();
+
+            // If we reached the bottom-right cell, return the time
+            if (x_cor == row - 1 && y_cor == col - 1) {
+                return time;
+            }
+
+            // Explore neighbors
+            for (int i = 0; i < 4; i++) {
+                int new_x_cor = x_cor + delrow[i];
+                int new_y_cor = y_cor + delcol[i];
+
+                // Check boundaries
+                if (new_x_cor >= 0 && new_y_cor >= 0 && new_x_cor < row && new_y_cor < col) {
+                    int next_time = time; //making a copy of time as if we directly modify time then other elements will access that modified tine causing problem
+
+                    // Adjust time to reach the new cell based on moveTime requirement
+                    if (next_time < moveTime[new_x_cor][new_y_cor]) {
+                        next_time = moveTime[new_x_cor][new_y_cor];
+                    }
+                    next_time++;
+
+                    // Only proceed if we found a quicker way to reach this cell
+                    if (next_time < timearray[new_x_cor][new_y_cor]) {
+                        timearray[new_x_cor][new_y_cor] = next_time;
+                        mini.push({next_time, {new_x_cor, new_y_cor}});
+                    }
+                }
+            }
+        }
+
+        // If we exit the loop without reaching the bottom-right, return -1 (or some error code)
+        return -1;
+    }
+};
